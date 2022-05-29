@@ -6,6 +6,7 @@ namespace Tomrf\PhpOptions\Test;
 
 use PHPUnit\Framework\TestCase;
 use Tomrf\PhpOptions\PhpOptions;
+use Tomrf\PhpOptions\PhpOptionsException;
 
 /**
  * @internal
@@ -23,8 +24,27 @@ final class PhpOptionsTest extends TestCase
         static::assertInstanceOf(PhpOptions::class, new PhpOptions());
     }
 
-    public function testGetClass(): void
+    public function testSetSystemOnlyDirectivesThrowsException(): void
     {
-        static::assertSame(PhpOptions::class, (new PhpOptions())->getClass());
+        $this->expectException(PhpOptionsException::class);
+
+        $phpOptions = new PhpOptions();
+        $phpOptions->setOption('allow_url_fopen', '1');
+    }
+
+    public function testSetUnknownDirectiveThrowsException(): void
+    {
+        $this->expectException(PhpOptionsException::class);
+
+        $phpOptions = new PhpOptions();
+        $phpOptions->setOption('illegal.directive', '0');
+    }
+
+    public function testSetEmptyDirectiveThrowsException(): void
+    {
+        $this->expectException(PhpOptionsException::class);
+
+        $phpOptions = new PhpOptions();
+        $phpOptions->setOption('', '0');
     }
 }
