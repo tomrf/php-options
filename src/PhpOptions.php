@@ -7,22 +7,18 @@ namespace Tomrf\PhpOptions;
 /**
  * PhpOptions.
  */
-class PhpOptions
+class PhpOptions extends PhpOptionDirectives
 {
-    public function getOption(string $option): string|false
+    public function get(string $option): string|false
     {
         return ini_get($option);
     }
 
-    public function setOption(string $option, string $value): string|false
+    public function set(string $option, string $value): string
     {
-        if (!isset(Directives::DIRECTIVES[$option])) {
-            throw new PhpOptionsException(sprintf('No such PHP configuration directive: "%s"', $option));
-        }
+        $changable = self::DIRECTIVES[$option][1] ?? 'UNKNOWN';
 
-        $changable = Directives::DIRECTIVES[$option][1] ?? '';
-
-        if ('PHP_INI_SYSTEM' === $changable) {
+        if ('PHP_INI_SYSTEM' === $changable || 'PHP_INI_PERDIR' === $changable) {
             throw new PhpOptionsException(sprintf(
                 'Unable to set directive "%s": only changable by %s',
                 $option,
@@ -30,6 +26,36 @@ class PhpOptions
             ));
         }
 
-        return ini_set($option, $value);
+        if (false === ini_set($option, $value)) {
+            if (!$this->isKnownDirective($option)) {
+                throw new PhpOptionsException(sprintf(
+                    'Failed to set unknown directive "%s": ini_set() returned false',
+                    $option
+                ));
+            }
+
+            throw new PhpOptionsException(sprintf(
+                'Failed to set directive "%s": ini_set() returned false',
+                $option
+            ));
+        }
+
+        $setValue = ini_get($option);
+
+        if (false === $setValue || (string) $setValue !== (string) $value) {
+            throw new PhpOptionsException(sprintf(
+                'Failed to set directive "%s": new value verification failed: %s = "%s"',
+                $option,
+                $option,
+                $setValue
+            ));
+        }
+
+        return $setValue;
+    }
+
+    public function isKnownDirective(string $option): bool
+    {
+        return isset(self::DIRECTIVES[$option]);
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tomrf\PhpOptions;
 
-class Directives
+class PhpOptionDirectives
 {
     public const DIRECTIVES = [
         'allow_url_fopen' => ['"1"', 'PHP_INI_SYSTEM'],
@@ -392,9 +392,4 @@ class Directives
         'zlib.output_compression_level' => ['"-1"', 'PHP_INI_ALL'],
         'zlib.output_handler' => ['""', 'PHP_INI_ALL'],
     ];
-
-    public function __construct()
-    {
-        // ..
-    }
 }

@@ -10,26 +10,31 @@ use Tomrf\PhpOptions\PhpOptionsException;
 
 /**
  * @internal
+ * @covers \Tomrf\PhpOptions\Directives
  * @covers \Tomrf\PhpOptions\PhpOptions
+ * @covers \Tomrf\PhpOptions\PhpOptionsException
  */
 final class PhpOptionsTest extends TestCase
 {
-    public static function setUpBeforeClass(): void
-    {
-        // ...
-    }
-
     public function testPhpOptionsIsInstanceOfPhpOptions(): void
     {
         static::assertInstanceOf(PhpOptions::class, new PhpOptions());
     }
 
-    public function testSetSystemOnlyDirectivesThrowsException(): void
+    public function testSetChangableBySystemDirectiveThrowsException(): void
     {
         $this->expectException(PhpOptionsException::class);
 
         $phpOptions = new PhpOptions();
-        $phpOptions->setOption('allow_url_fopen', '1');
+        $phpOptions->set('allow_url_fopen', '1');
+    }
+
+    public function testSetChangablePerDirDirectiveThrowsException(): void
+    {
+        $this->expectException(PhpOptionsException::class);
+
+        $phpOptions = new PhpOptions();
+        $phpOptions->set('auto_append_file', '1');
     }
 
     public function testSetUnknownDirectiveThrowsException(): void
@@ -37,7 +42,7 @@ final class PhpOptionsTest extends TestCase
         $this->expectException(PhpOptionsException::class);
 
         $phpOptions = new PhpOptions();
-        $phpOptions->setOption('illegal.directive', '0');
+        $phpOptions->set('illegal.directive', '0');
     }
 
     public function testSetEmptyDirectiveThrowsException(): void
@@ -45,6 +50,27 @@ final class PhpOptionsTest extends TestCase
         $this->expectException(PhpOptionsException::class);
 
         $phpOptions = new PhpOptions();
-        $phpOptions->setOption('', '0');
+        $phpOptions->set('', '0');
+    }
+
+    public function testSetAndGetChangableByAllDirective(): void
+    {
+        $phpOptions = new PhpOptions();
+        static::assertSame('1234M', $phpOptions->set('memory_limit', '1234M'));
+        static::assertSame('1234M', $phpOptions->get('memory_limit'));
+    }
+
+    public function testGetUnknownDirectiveReturnsFalse(): void
+    {
+        $phpOptions = new PhpOptions();
+        static::assertFalse($phpOptions->get('illegal_directive'));
+        static::assertFalse($phpOptions->get('another.illegal_directive'));
+    }
+
+    public function testIsKnownDirective(): void
+    {
+        $phpOptions = new PhpOptions();
+        static::assertFalse($phpOptions->isKnownDirective('illegal_directive'));
+        static::assertTrue($phpOptions->isKnownDirective('memory_limit'));
     }
 }
