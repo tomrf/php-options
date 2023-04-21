@@ -1,7 +1,7 @@
 {
     "name": "tomrf/php-options",
     "type": "library",
-    "description": "php-options",
+    "description": "get and set PHP options/ini settings with validation",
     "keywords": [ "php-options" ],
     "homepage": "http://github.com/tomrf/php-options",
     "license": "MIT",
@@ -39,11 +39,14 @@
             "phpmd src/ ansi .phpmd-ruleset.xml"
         ],
         "test": [
-            "@phpunit",
+            "@phpunit"
+        ],
+        "check": [
+            "@test",
             "@phpmd",
             "@phpstan"
         ],
-        "coverage": [
+        "test-coverage": [
             "@putenv XDEBUG_MODE=coverage",
             "@phpunit --coverage-xml .phpunit.cache/code-coverage/xml",
             "ls -al .phpunit.cache/code-coverage/xml"
